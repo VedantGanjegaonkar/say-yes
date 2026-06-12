@@ -33,6 +33,14 @@
   color: var(--rose-text);
 }
 
+.mail-note {
+  margin-top: 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  opacity: 0.55;
+  animation: pop 0.4s ease;
+}
+
 .confetti {
   position: absolute;
   inset: 0;

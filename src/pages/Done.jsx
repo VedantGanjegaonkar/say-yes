@@ -1,5 +1,7 @@
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { usePlan } from '../context/PlanContext.jsx'
+import { sendPlan } from '../lib/sendPlan.js'
 import './shared.css'
 import './Done.css'
 
@@ -18,6 +20,15 @@ function formatDate(value) {
 
 export default function Done() {
   const { plan } = usePlan()
+  const [mailStatus, setMailStatus] = useState('')
+  const sentRef = useRef(false)
+
+  useEffect(() => {
+    // Only send once, and only if she actually went through the flow.
+    if (sentRef.current || !plan.date) return
+    sentRef.current = true
+    sendPlan(plan).then(setMailStatus)
+  }, [plan])
 
   return (
     <main className="page">
@@ -65,6 +76,10 @@ export default function Done() {
         <p className="subtitle" style={{ marginTop: 22, marginBottom: 0 }}>
           Can't wait to see you! 🌸
         </p>
+
+        {mailStatus === 'sent' && (
+          <p className="mail-note">💌 Delivered straight to my heart (and inbox)</p>
+        )}
 
         <Link className="back-link" to="/">
           ← Start over
