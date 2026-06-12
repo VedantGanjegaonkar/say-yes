@@ -1,0 +1,29 @@
+.drinks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.drink {
+  padding: 22px 12px;
+  border-radius: 18px;
+  background: var(--pink-soft);
+  color: var(--rose-text);
+  font-size: 1.1rem;
+  font-weight: 700;
+  transition: transform 0.2s ease, background 0.18s ease;
+}
+
+.drink:hover {
+  background: #fcd3e4;
+  transform: translateY(-2px);
+}
+
+.drink:active {
+  transform: scale(0.97);
+}
+
+.drink.tease {
+  background: #4a3340;
+  color: #ffe4ef;
+}

@@ -1,0 +1,33 @@
+:root {
+  --pink: #f7a8c4;
+  --pink-deep: #e76a9b;
+  --pink-soft: #fde4ee;
+  --rose-text: #6e3b4e;
+  --card: #ffffff;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  min-height: 100dvh;
+  background: linear-gradient(160deg, #ffeaf3 0%, #ffe0ec 50%, #ffd6e8 100%);
+  color: var(--rose-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+}

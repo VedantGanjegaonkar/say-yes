@@ -1,0 +1,103 @@
+.page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.page .card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--card);
+  border-radius: 28px;
+  padding: 36px 26px 38px;
+  text-align: center;
+  box-shadow: 0 18px 50px rgba(231, 106, 155, 0.25);
+  animation: pop 0.4s ease;
+}
+
+.step {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--pink-deep);
+  opacity: 0.7;
+  margin-bottom: 10px;
+}
+
+.emoji {
+  font-size: 64px;
+  margin-bottom: 10px;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.3;
+  color: var(--rose-text);
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  font-size: 1rem;
+  opacity: 0.75;
+  margin-bottom: 26px;
+}
+
+/* Inputs */
+.date-input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 2px solid var(--pink-soft);
+  background: #fff;
+  font-size: 1rem;
+  color: var(--rose-text);
+  margin-bottom: 26px;
+  font-family: inherit;
+}
+
+.date-input:focus {
+  outline: none;
+  border-color: var(--pink);
+}
+
+/* Buttons */
+.btn {
+  padding: 14px 32px;
+  border-radius: 999px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.btn.primary {
+  background: var(--pink-deep);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(231, 106, 155, 0.45);
+}
+
+.btn.primary:hover {
+  filter: brightness(1.05);
+}
+
+.btn.primary:active {
+  transform: scale(0.96);
+}
+
+.btn.primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 18px;
+  color: var(--rose-text);
+  opacity: 0.6;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+}

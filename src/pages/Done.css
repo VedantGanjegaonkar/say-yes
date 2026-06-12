@@ -1,0 +1,59 @@
+.page {
+  position: relative;
+  overflow: hidden;
+}
+
+.summary {
+  list-style: none;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.summary li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--pink-soft);
+}
+
+.summary .k {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  opacity: 0.7;
+}
+
+.summary .v {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--rose-text);
+}
+
+.confetti {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.confetti span {
+  position: absolute;
+  top: -40px;
+  font-size: 26px;
+  animation: fall 4.5s linear infinite;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(110dvh) rotate(360deg);
+  }
+}
+
+.card {
+  position: relative;
+  z-index: 2;
+}
