@@ -43,6 +43,14 @@ export default function Done() {
             <span className="v">{formatDate(plan.date)}</span>
           </li>
           <li>
+            <span className="k">📍 Where</span>
+            <span className="v">{plan.venue || 'The universe decides 🪄'}</span>
+          </li>
+          <li>
+            <span className="k">💅 Vibe</span>
+            <span className="v">{plan.fancy || 'Five star, obviously'}</span>
+          </li>
+          <li>
             <span className="k">🍹 Drink</span>
             <span className="v">{plan.drink || 'Surprise me!'}</span>
           </li>

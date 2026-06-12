@@ -1,7 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import frogSticker from '../assets/frog-sticker.webp'
+import FakeLoader from '../components/FakeLoader.jsx'
 import './Landing.css'
+
+const LOADER_LINES = [
+  'Processing your yes 💝',
+  'No take-backs 😌',
+  'Done ✅',
+]
 
 const TEASES = [
   'No',
@@ -17,6 +24,7 @@ export default function Landing() {
   const navigate = useNavigate()
   const [offset, setOffset] = useState({ x: 0, y: 0 })
   const [tries, setTries] = useState(0)
+  const [loading, setLoading] = useState(false)
 
   function runAway() {
     // Small, playful nudge — stays right near the card.
@@ -31,6 +39,8 @@ export default function Landing() {
 
   return (
     <main className="landing">
+      {loading && <FakeLoader lines={LOADER_LINES} onDone={() => navigate('/page-1')} />}
+
       <div className="card">
         <div className="photo">
           <img src={frogSticker} alt="frog sticker" />
@@ -44,7 +54,7 @@ export default function Landing() {
           <button
             className="btn yes"
             style={{ transform: `scale(${yesScale})` }}
-            onClick={() => navigate('/page-1')}
+            onClick={() => setLoading(true)}
           >
             Yes 💕
           </button>

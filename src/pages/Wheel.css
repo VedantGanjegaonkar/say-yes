@@ -1,0 +1,86 @@
+.wheel-wrap {
+  position: relative;
+  width: 250px;
+  height: 250px;
+  margin: 6px auto 20px;
+}
+
+.pointer {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  font-size: 26px;
+  color: var(--pink-deep);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.wheel {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 7px solid #fff;
+  box-shadow: 0 12px 30px rgba(231, 106, 155, 0.35);
+  background: conic-gradient(
+    #f8b4d1 0deg 60deg,
+    #fde4ee 60deg 120deg,
+    #f49ec6 120deg 180deg,
+    #ffd9ea 180deg 240deg,
+    #ef8ab4 240deg 300deg,
+    #fcecf4 300deg 360deg
+  );
+  position: relative;
+  transition: transform 4s cubic-bezier(0.15, 0.9, 0.25, 1);
+}
+
+.wheel-label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 36px;
+  height: 36px;
+  margin: -18px;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+}
+
+.hub {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 56px;
+  height: 56px;
+  margin: -28px;
+  border-radius: 50%;
+  background: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.wheel-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.spin-btn {
+  background: #4a3340;
+  color: #ffe4ef;
+}
+
+.spin-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+@media (max-width: 350px) {
+  .wheel-wrap {
+    transform: scale(0.85);
+    margin: -6px auto 8px;
+  }
+}

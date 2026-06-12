@@ -107,15 +107,19 @@
   }
 }
 
-.love-note {
-  background: var(--pink-soft);
+.weather-note {
+  background: #eef6ff;
   border-radius: 14px;
   padding: 12px 16px;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 600;
-  color: var(--rose-text);
+  color: #3d5a7a;
   margin-bottom: 16px;
   animation: pop 0.35s ease;
+}
+
+.weather-note.checking {
+  opacity: 0.7;
 }
 
 .time-row {

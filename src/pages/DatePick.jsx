@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usePlan } from '../context/PlanContext.jsx'
+import FakeLoader from '../components/FakeLoader.jsx'
 import './shared.css'
 import './DatePick.css'
 
@@ -17,10 +18,23 @@ const UNLOCK_LINES = [
   "Shifting my whole schedule... done. It's yours 🌸",
 ]
 
+const LOADER_LINES = [
+  'Checking my schedule 📅',
+  'Cancelling my meetings 🚮',
+  'Telling my mom 🙈',
+  'Done ✅',
+]
+
 // Deterministic "busy" days — scattered, stable across renders.
 function isBusyDay(y, m, d) {
   const s = y * 373 + m * 37 + d * 7
   return s % 10 === 2 || s % 10 === 5 || s % 10 === 8
+}
+
+// Deterministic fake forecast — some days "rain", none of them matter 😌
+function isRainyDay(y, m, d) {
+  const s = y * 211 + m * 53 + d * 11
+  return s % 3 === 0
 }
 
 function ymd(y, m, d) {
@@ -37,6 +51,11 @@ export default function DatePick() {
   const [unlocked, setUnlocked] = useState([]) // busy dates she freed up 💕
   const [message, setMessage] = useState('')
   const [time, setTime] = useState('19:00')
+  const [weather, setWeather] = useState(null) // null | 'checking' | 'rain' | 'clear'
+  const [loading, setLoading] = useState(false)
+  const weatherTimer = useRef(null)
+
+  useEffect(() => () => clearTimeout(weatherTimer.current), [])
 
   const firstDay = new Date(view.y, view.m, 1).getDay()
   const daysInMonth = new Date(view.y, view.m + 1, 0).getDate()
@@ -62,17 +81,26 @@ export default function DatePick() {
       setMessage('')
     }
     setSelected(key)
+
+    // Fake weather check — rain is never a problem 😌
+    setWeather('checking')
+    clearTimeout(weatherTimer.current)
+    weatherTimer.current = setTimeout(() => {
+      setWeather(isRainyDay(view.y, view.m, d) ? 'rain' : 'clear')
+    }, 800)
   }
 
   function next() {
     update({ date: `${selected}T${time}` })
-    navigate('/page-2')
+    setLoading(true)
   }
 
   return (
     <main className="page">
+      {loading && <FakeLoader lines={LOADER_LINES} onDone={() => navigate('/page-2')} />}
+
       <div className="card">
-        <div className="step">Step 1 of 3</div>
+        <div className="step">Step 1 of 5</div>
         <div className="emoji">📅</div>
         <h1 className="title">Yaaay! When are you free? 💕</h1>
         <p className="subtitle">Pick a day & time for our date</p>
@@ -138,6 +166,19 @@ export default function DatePick() {
         </div>
 
         {message && <p className="love-note">{message}</p>}
+
+        {weather === 'checking' && (
+          <p className="weather-note checking">🛰️ Checking the weather that day...</p>
+        )}
+        {weather === 'rain' && (
+          <p className="weather-note">
+            ☔ Forecast says rain that day... doesn't matter. Umbrella ready —
+            I'll pick you up at your door 🚗💕
+          </p>
+        )}
+        {weather === 'clear' && (
+          <p className="weather-note">🌤️ Clear skies that day — even the universe approves ✨</p>
+        )}
 
         <div className="time-row">
           <label htmlFor="time">🕖 At</label>
