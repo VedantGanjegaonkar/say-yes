@@ -1,29 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { usePlan } from '../context/PlanContext.jsx'
 import FakeLoader from '../components/FakeLoader.jsx'
+import { usePlan } from '../context/PlanContext.jsx'
+import { useConfig } from '../context/ConfigContext.jsx'
+import { useFlowNav } from '../recipient/useFlowNav.js'
+import { MONTHS, WEEKDAYS } from '../lib/defaults.js'
 import './shared.css'
 import './DatePick.css'
-
-const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
-]
-const WEEKDAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
-
-const UNLOCK_LINES = [
-  "I was busy that day... but for you? I'll move everything 💕",
-  "Had work then — cancelled. You matter more 🥰",
-  "For you, I have ample time. Work can wait 💖",
-  "Shifting my whole schedule... done. It's yours 🌸",
-]
-
-const LOADER_LINES = [
-  'Checking my schedule 📅',
-  'Cancelling my meetings 🚮',
-  'Telling my mom 🙈',
-  'Done ✅',
-]
 
 // Deterministic "busy" days — scattered, stable across renders.
 function isBusyDay(y, m, d) {
@@ -42,7 +24,9 @@ function ymd(y, m, d) {
 }
 
 export default function DatePick() {
-  const navigate = useNavigate()
+  const { config } = useConfig()
+  const c = config.content.datepick
+  const flow = useFlowNav('datepick')
   const { update } = usePlan()
 
   const today = new Date()
@@ -50,7 +34,7 @@ export default function DatePick() {
   const [selected, setSelected] = useState('')
   const [unlocked, setUnlocked] = useState([]) // busy dates she freed up 💕
   const [message, setMessage] = useState('')
-  const [time, setTime] = useState('19:00')
+  const [time, setTime] = useState(c.defaultTime || '19:00')
   const [weather, setWeather] = useState(null) // null | 'checking' | 'rain' | 'clear'
   const [loading, setLoading] = useState(false)
   const weatherTimer = useRef(null)
@@ -76,7 +60,7 @@ export default function DatePick() {
     if (busy && !unlocked.includes(key)) {
       // The loving gesture: busy date melts away for her 💕
       setUnlocked((u) => [...u, key])
-      setMessage(UNLOCK_LINES[unlocked.length % UNLOCK_LINES.length])
+      setMessage(c.unlockLines[unlocked.length % c.unlockLines.length])
     } else {
       setMessage('')
     }
@@ -97,13 +81,13 @@ export default function DatePick() {
 
   return (
     <main className="page">
-      {loading && <FakeLoader lines={LOADER_LINES} onDone={() => navigate('/page-2')} />}
+      {loading && <FakeLoader lines={c.loaderMessages} onDone={flow.next} />}
 
       <div className="card">
-        <div className="step">Step 1 of 5</div>
+        <div className="step">Step {flow.step} of {flow.total}</div>
         <div className="emoji">📅</div>
-        <h1 className="title">Yaaay! When are you free? 💕</h1>
-        <p className="subtitle">Pick a day & time for our date</p>
+        <h1 className="title">{c.title}</h1>
+        <p className="subtitle">{c.subtitle}</p>
 
         <div className="cal">
           <div className="cal-head">
@@ -137,8 +121,7 @@ export default function DatePick() {
             {Array.from({ length: daysInMonth }, (_, i) => {
               const d = i + 1
               const key = ymd(view.y, view.m, d)
-              const isPast =
-                isCurrentMonth && d < today.getDate()
+              const isPast = isCurrentMonth && d < today.getDate()
               const busy = isBusyDay(view.y, view.m, d) && !unlocked.includes(key)
               const cls = [
                 'cal-day',

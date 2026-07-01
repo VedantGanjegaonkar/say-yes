@@ -1,0 +1,677 @@
+/* ── Masculine "maker's workshop" theme for the builder chrome. ──────────
+   Dark blueprint slate + electric blue/cyan, with amber "spark" energy.
+   The phone PREVIEW (screen, card, sticker mini-preview) stays feminine
+   pink on purpose — the boy is building something girly. */
+.builder {
+  --bg-0: #0b1120;
+  --bg-1: #131c30;
+  --grid: rgba(56, 189, 248, 0.05);
+  --panel: rgba(148, 163, 184, 0.05);
+  --panel-border: #22314b;
+  --b-card: #141d31;
+  --card-border: #26344d;
+  --ink: #dce6f5;
+  --ink-dim: #8ba0bf;
+  --field: #0f1a2c;
+  --field-border: #2a3a56;
+  --accent-1: #3b82f6; /* electric blue */
+  --accent-2: #22d3ee; /* cyan */
+  --spark: #f59e0b;    /* amber energy */
+  --danger: #f87171;
+  --femme: #f472b6;    /* preview accent — stays feminine */
+
+  height: 100vh;
+  background:
+    linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 28px 28px,
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 28px 28px,
+    linear-gradient(160deg, var(--bg-0) 0%, var(--bg-1) 100%);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  overflow: hidden;
+}
+
+.b-shell {
+  display: grid;
+  grid-template-columns: 232px 1fr 420px;
+  height: 100vh;
+}
+
+/* ── Step rail ─────────────────────────────────────────── */
+.b-rail {
+  background: var(--panel);
+  border-right: 1px solid var(--panel-border);
+  padding: 22px 16px;
+  overflow-y: auto;
+  backdrop-filter: blur(6px);
+}
+.b-brand {
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 22px;
+  letter-spacing: 0.01em;
+}
+.b-frog {
+  font-size: 26px;
+  filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.55));
+}
+.b-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.b-step {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: none;
+  color: var(--ink-dim);
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-align: left;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.b-step:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ink);
+}
+.b-step.active {
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  color: #05121f;
+  box-shadow: 0 6px 20px rgba(34, 211, 238, 0.35);
+}
+.b-step-dot {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
+  border-radius: 50%;
+  background: #1b2740;
+  border: 1px solid #2c3d5a;
+  display: grid;
+  place-items: center;
+  font-size: 0.9rem;
+}
+.b-step.active .b-step-dot {
+  background: rgba(5, 18, 31, 0.25);
+  border-color: transparent;
+}
+.b-step.done .b-step-dot {
+  background: rgba(34, 211, 238, 0.16);
+  border-color: rgba(34, 211, 238, 0.4);
+  color: var(--accent-2);
+}
+.b-step.skipped:not(.active) .b-step-label {
+  text-decoration: line-through;
+  opacity: 0.45;
+}
+.b-step.skipped:not(.active) .b-step-dot {
+  opacity: 0.45;
+}
+
+/* ── Main column ───────────────────────────────────────── */
+.b-main {
+  overflow-y: auto;
+  padding: 0 30px 40px;
+  display: flex;
+  flex-direction: column;
+}
+.b-progress {
+  position: sticky;
+  top: 0;
+  height: 4px;
+  background: #1b2740;
+  border-radius: 999px;
+  margin: 16px 0 20px;
+  overflow: hidden;
+  z-index: 2;
+}
+.b-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-1), var(--accent-2) 70%, var(--spark));
+  border-radius: 999px;
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.5);
+  transition: width 0.35s ease;
+}
+.b-main-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.b-main-icon {
+  font-size: 34px;
+}
+.b-main-head h1 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: var(--ink);
+}
+.b-main-head p {
+  margin: 2px 0 0;
+  font-size: 0.82rem;
+  color: var(--ink-dim);
+}
+
+.b-step-card {
+  background: var(--b-card);
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45);
+  animation: stepIn 0.34s ease;
+}
+@keyframes stepIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.hint {
+  margin: 0 0 14px;
+  font-size: 0.88rem;
+  color: var(--ink-dim);
+}
+
+/* ── Skip toggle ───────────────────────────────────────── */
+.b-skip-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: -4px 0 16px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(34, 211, 238, 0.08);
+  border: 1px solid rgba(34, 211, 238, 0.28);
+}
+.b-skip-bar.skipped {
+  background: rgba(245, 158, 11, 0.09);
+  border-color: rgba(245, 158, 11, 0.32);
+}
+.b-skip-note {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent-2);
+}
+.b-skip-bar.skipped .b-skip-note {
+  color: var(--spark);
+}
+.b-skip-btn {
+  flex: 0 0 auto;
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent-2);
+  background: #10203a;
+  border: 1px solid rgba(34, 211, 238, 0.4);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.b-skip-btn:hover {
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  border-color: transparent;
+  color: #05121f;
+}
+.b-fields-off {
+  opacity: 0.4;
+  pointer-events: none;
+  filter: grayscale(0.4);
+}
+
+/* ── Fields ────────────────────────────────────────────── */
+.fld {
+  display: block;
+  margin-bottom: 14px;
+}
+.fld-label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: var(--ink-dim);
+}
+.fld input,
+.fld textarea,
+.fld select,
+.b-link input,
+.sticker-inputs input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1.5px solid var(--field-border);
+  border-radius: 10px;
+  padding: 9px 11px;
+  font-size: 0.92rem;
+  font-family: inherit;
+  background: var(--field);
+  color: var(--ink);
+}
+.fld textarea {
+  resize: vertical;
+}
+.fld input:focus,
+.fld textarea:focus,
+.fld select:focus {
+  outline: none;
+  border-color: var(--accent-2);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.16);
+}
+
+.list {
+  margin-bottom: 16px;
+}
+.list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-dim);
+  margin-bottom: 8px;
+}
+
+/* Sortable rows */
+.srow {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 7px;
+  background: var(--field);
+  border-radius: 10px;
+}
+.srow.dragging {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+  background: #16233b;
+}
+.srow input {
+  flex: 1;
+  min-width: 0;
+  border: 1.5px solid var(--field-border);
+  border-radius: 9px;
+  padding: 7px 9px;
+  font-size: 0.9rem;
+  background: var(--field);
+  color: var(--ink);
+  font-family: inherit;
+}
+.srow input.sm {
+  flex: 0 0 60px;
+}
+.srow input:focus {
+  outline: none;
+  border-color: var(--accent-2);
+}
+.grip {
+  flex: 0 0 auto;
+  background: none;
+  color: #5c7095;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 6px 4px;
+  cursor: grab;
+  touch-action: none;
+  border-radius: 6px;
+}
+.grip:hover {
+  color: var(--accent-2);
+  background: rgba(34, 211, 238, 0.1);
+}
+.grip:active {
+  cursor: grabbing;
+}
+
+.mini {
+  border: 1px solid var(--field-border);
+  background: #17233a;
+  color: var(--accent-2);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.mini:hover {
+  background: #1e2c46;
+  border-color: rgba(34, 211, 238, 0.4);
+}
+.mini.danger {
+  background: rgba(248, 113, 113, 0.12);
+  border-color: rgba(248, 113, 113, 0.3);
+  color: #fca5a5;
+}
+
+.ck {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.92rem;
+  cursor: pointer;
+}
+.ck input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent-1);
+}
+.ck.grow {
+  flex: 1;
+  padding: 4px 0;
+}
+.page-ico {
+  font-size: 1.1rem;
+}
+
+/* Sticker — mini preview stays feminine (it previews the pink sticker) */
+.sticker-box {
+  margin-top: 4px;
+}
+.sticker-row {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.sticker-preview {
+  flex: 0 0 84px;
+  width: 84px;
+  height: 84px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #ffe9d6, #ffd0e2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(244, 114, 182, 0.35), 0 6px 16px rgba(236, 72, 153, 0.25);
+}
+.sticker-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.sticker-inputs {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.sticker-inputs .or {
+  font-size: 0.78rem;
+  color: var(--ink-dim);
+}
+
+/* ── Nav footer ────────────────────────────────────────── */
+.b-error {
+  color: #fca5a5;
+  background: rgba(248, 113, 113, 0.12);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  margin: 14px 0 0;
+}
+.b-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+.b-back,
+.b-next {
+  border: none;
+  border-radius: 999px;
+  padding: 12px 22px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.b-back {
+  background: #1b2740;
+  color: var(--ink);
+  border: 1px solid var(--card-border);
+}
+.b-back:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.b-next {
+  margin-left: auto;
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  color: #05121f;
+  box-shadow: 0 6px 18px rgba(34, 211, 238, 0.35);
+}
+.b-mobile-preview {
+  display: none;
+  border: 1px solid var(--card-border);
+  background: #1b2740;
+  color: var(--accent-2);
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 12px 18px;
+  cursor: pointer;
+}
+
+/* ── Share step ────────────────────────────────────────── */
+.share-step {
+  text-align: center;
+}
+.share-summary {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+.share-summary li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+}
+.share-summary li span {
+  font-size: 1.1rem;
+}
+.share-summary em {
+  color: var(--spark);
+  font-style: normal;
+}
+.b-go {
+  border: none;
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  color: #05121f;
+  font-size: 1.05rem;
+  font-weight: 700;
+  padding: 15px 34px;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(34, 211, 238, 0.4);
+}
+.b-go:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.b-result-emoji {
+  font-size: 46px;
+}
+.b-result-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--accent-2);
+  margin: 6px 0 14px;
+}
+.b-link {
+  display: flex;
+  gap: 8px;
+  margin: 0 auto 14px;
+  max-width: 420px;
+}
+.b-link input {
+  flex: 1;
+}
+.b-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  align-items: center;
+}
+.b-open {
+  color: var(--accent-2);
+  font-weight: 700;
+  text-decoration: none;
+}
+.b-again {
+  border: none;
+  background: none;
+  color: var(--ink-dim);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* ── Preview column + phone frame (kept feminine) ──────── */
+.b-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+  border-left: 1px solid var(--panel-border);
+  background: var(--panel);
+}
+.b-preview-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--femme);
+  opacity: 0.85;
+}
+.phone {
+  position: relative;
+  width: 320px;
+  height: 640px;
+  background: #0d1526;
+  border: 1px solid #223049;
+  border-radius: 42px;
+  padding: 12px;
+  box-shadow: 0 24px 60px rgba(236, 72, 153, 0.3);
+}
+.phone-notch {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 22px;
+  background: #0d1526;
+  border-radius: 0 0 16px 16px;
+  z-index: 3;
+}
+.phone-screen {
+  width: 100%;
+  height: 100%;
+  border-radius: 30px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: linear-gradient(160deg, #ffeaf3 0%, #ffe0ec 50%, #ffd6e8 100%);
+}
+/* Neutralize the recipient pages' full-viewport sizing inside the frame */
+.phone-screen .page,
+.phone-screen .landing {
+  min-height: 100%;
+  padding: 18px;
+}
+.phone-screen .card {
+  box-shadow: 0 10px 26px rgba(231, 106, 155, 0.2);
+}
+
+/* ── Mobile preview modal ──────────────────────────────── */
+.pv-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 10, 20, 0.72);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 16px;
+}
+.pv-modal-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.pv-close {
+  border: 1px solid var(--card-border);
+  background: #1b2740;
+  color: var(--femme);
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 10px 18px;
+  cursor: pointer;
+}
+
+/* ── Responsive ────────────────────────────────────────── */
+@media (max-width: 960px) {
+  .builder {
+    height: auto;
+    overflow: visible;
+  }
+  .b-shell {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  .b-rail {
+    border-right: none;
+    border-bottom: 1px solid var(--panel-border);
+    padding: 14px;
+  }
+  .b-steps {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 6px;
+  }
+  .b-step-label {
+    display: none;
+  }
+  .b-step {
+    padding: 8px;
+  }
+  .b-step.active .b-step-label {
+    display: inline;
+  }
+  .b-main {
+    height: auto;
+    overflow: visible;
+    padding: 0 16px 40px;
+  }
+  .b-preview {
+    display: none;
+  }
+  .b-mobile-preview {
+    display: inline-block;
+  }
+  .b-next {
+    margin-left: 0;
+  }
+  .b-nav {
+    flex-wrap: wrap;
+  }
+}
