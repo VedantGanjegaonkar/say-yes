@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { nanoid } from 'nanoid'
 import { supabase } from '../lib/supabase.js'
 import { cloneDefaultConfig, PAGE_TITLES } from '../lib/defaults.js'
@@ -11,6 +11,16 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const MAX_STICKER_BYTES = 1024 * 1024 // 1 MB
 const OK_TYPES = ['image/webp', 'image/png', 'image/jpeg']
 const PAGE_ICONS = { datepick: '📅', wheel: '🎡', budget: '💅', drinks: '🍹', playlist: '🎧' }
+
+// Tucks secondary fields behind a tap so each step stays short on mobile.
+function More({ children }) {
+  return (
+    <details className="b-more">
+      <summary>More options</summary>
+      <div className="b-more-body">{children}</div>
+    </details>
+  )
+}
 
 export default function Builder() {
   const [config, setConfig] = useState(cloneDefaultConfig)
@@ -133,6 +143,38 @@ export default function Builder() {
     }
   }
 
+  const goNext = () => setStepIndex((i) => Math.min(steps.length - 1, i + 1))
+  const goPrev = () => setStepIndex((i) => Math.max(0, i - 1))
+
+  // Swipe left/right to move between steps (ignored on inputs so text selection works).
+  const touch = useRef(null)
+  const onTouchStart = (e) => {
+    if (e.target.closest('input, textarea, select')) return (touch.current = null)
+    const t = e.touches[0]
+    touch.current = { x: t.clientX, y: t.clientY }
+  }
+  const onTouchEnd = (e) => {
+    if (!touch.current) return
+    const t = e.changedTouches[0]
+    const dx = t.clientX - touch.current.x
+    const dy = t.clientY - touch.current.y
+    touch.current = null
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return
+    if (dx < 0) goNext()
+    else goPrev()
+  }
+
+  // One-tap create using all defaults — jump to Share and generate (needs an email).
+  function quickCreate() {
+    if (!EMAIL_RE.test(email.trim())) {
+      setStepIndex(steps.findIndex((s) => s.id === 'done'))
+      setError('Add your email here, then tap Quick create 💘')
+      return
+    }
+    setStepIndex(steps.length - 1)
+    generate()
+  }
+
   function renderStep() {
     switch (step.id) {
       case 'landing':
@@ -140,8 +182,6 @@ export default function Builder() {
           <>
             <Field label="Invitation" value={C.landing.invitation} onChange={setC('landing', 'invitation')} textarea />
             <Field label="“Yes” button" value={C.landing.yesLabel} onChange={setC('landing', 'yesLabel')} />
-            <StringList label="“No” button teases (it dodges through these)" items={C.landing.teases} onChange={setC('landing', 'teases')} placeholder="No / Are you sure? …" />
-            <StringList label="Loading captions" items={C.landing.loaderMessages} onChange={setC('landing', 'loaderMessages')} />
             <div className="sticker-box">
               <span className="fld-label">Sticker</span>
               <div className="sticker-row">
@@ -164,6 +204,10 @@ export default function Builder() {
                 </div>
               </div>
             </div>
+            <More>
+              <StringList label="“No” button teases (it dodges through these)" items={C.landing.teases} onChange={setC('landing', 'teases')} placeholder="No / Are you sure? …" />
+              <StringList label="Loading captions" items={C.landing.loaderMessages} onChange={setC('landing', 'loaderMessages')} />
+            </More>
           </>
         )
 
@@ -173,8 +217,10 @@ export default function Builder() {
             <Field label="Title" value={C.datepick.title} onChange={setC('datepick', 'title')} />
             <Field label="Subtitle" value={C.datepick.subtitle} onChange={setC('datepick', 'subtitle')} />
             <Field label="Default time" value={C.datepick.defaultTime} onChange={setC('datepick', 'defaultTime')} placeholder="19:00" />
-            <StringList label="Busy-day sweet lines" items={C.datepick.unlockLines} onChange={setC('datepick', 'unlockLines')} />
-            <StringList label="Loading captions" items={C.datepick.loaderMessages} onChange={setC('datepick', 'loaderMessages')} />
+            <More>
+              <StringList label="Busy-day sweet lines" items={C.datepick.unlockLines} onChange={setC('datepick', 'unlockLines')} />
+              <StringList label="Loading captions" items={C.datepick.loaderMessages} onChange={setC('datepick', 'loaderMessages')} />
+            </More>
           </>
         )
 
@@ -198,7 +244,9 @@ export default function Builder() {
                 ))}
               </select>
             </label>
-            <StringList label="Loading captions" items={C.wheel.loaderMessages} onChange={setC('wheel', 'loaderMessages')} />
+            <More>
+              <StringList label="Loading captions" items={C.wheel.loaderMessages} onChange={setC('wheel', 'loaderMessages')} />
+            </More>
           </>
         )
 
@@ -219,8 +267,10 @@ export default function Builder() {
               ]}
               makeEmpty={() => ({ max: 100, emoji: '💖', label: '', line: '' })}
             />
-            <Field label="Reassurance line" value={C.budget.noWrong} onChange={setC('budget', 'noWrong')} textarea />
-            <StringList label="Loading captions" items={C.budget.loaderMessages} onChange={setC('budget', 'loaderMessages')} />
+            <More>
+              <Field label="Reassurance line" value={C.budget.noWrong} onChange={setC('budget', 'noWrong')} textarea />
+              <StringList label="Loading captions" items={C.budget.loaderMessages} onChange={setC('budget', 'loaderMessages')} />
+            </More>
           </>
         )
 
@@ -236,8 +286,10 @@ export default function Builder() {
               columns={[{ key: 'label', label: 'Label (with emoji)' }, { key: 'tease', label: 'tease', type: 'checkbox' }]}
               makeEmpty={() => ({ id: nanoid(6), label: '', tease: false })}
             />
-            <StringList label="Tease dodge lines" items={C.drinks.teaseLines} onChange={setC('drinks', 'teaseLines')} />
-            <StringList label="Loading captions" items={C.drinks.loaderMessages} onChange={setC('drinks', 'loaderMessages')} />
+            <More>
+              <StringList label="Tease dodge lines" items={C.drinks.teaseLines} onChange={setC('drinks', 'teaseLines')} />
+              <StringList label="Loading captions" items={C.drinks.loaderMessages} onChange={setC('drinks', 'loaderMessages')} />
+            </More>
           </>
         )
 
@@ -252,7 +304,9 @@ export default function Builder() {
               Allow a custom “any other” song
             </label>
             {C.playlist.allowCustom && <Field label="Custom option label" value={C.playlist.customLabel} onChange={setC('playlist', 'customLabel')} />}
-            <StringList label="Loading captions" items={C.playlist.loaderMessages} onChange={setC('playlist', 'loaderMessages')} />
+            <More>
+              <StringList label="Loading captions" items={C.playlist.loaderMessages} onChange={setC('playlist', 'loaderMessages')} />
+            </More>
           </>
         )
 
@@ -261,9 +315,11 @@ export default function Builder() {
           <>
             <Field label="Title" value={C.done.title} onChange={setC('done', 'title')} />
             <Field label="Subtitle" value={C.done.subtitle} onChange={setC('done', 'subtitle')} />
-            <Field label="Closing line" value={C.done.closing} onChange={setC('done', 'closing')} />
-            <Field label="Confetti emojis" value={C.done.confetti} onChange={setC('done', 'confetti')} />
             <Field label="Your email (answers are sent here)" value={email} onChange={setEmail} placeholder="you@example.com" />
+            <More>
+              <Field label="Closing line" value={C.done.closing} onChange={setC('done', 'closing')} />
+              <Field label="Confetti emojis" value={C.done.confetti} onChange={setC('done', 'confetti')} />
+            </More>
           </>
         )
 
@@ -312,6 +368,9 @@ export default function Builder() {
         {/* Step rail */}
         <aside className="b-rail">
           <div className="b-brand"><span className="b-frog">🛠️</span> DateForm</div>
+          <button className="b-quick" onClick={quickCreate} disabled={generating}>
+            ⚡ Quick create <span className="b-quick-sub">use defaults</span>
+          </button>
           <ol className="b-steps">
             {steps.map((s, i) => (
               <li key={s.id}>
@@ -328,7 +387,7 @@ export default function Builder() {
         </aside>
 
         {/* Current step */}
-        <section className="b-main">
+        <section className="b-main" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
           <div className="b-progress"><div className="b-progress-fill" style={{ width: `${((idx + 1) / steps.length) * 100}%` }} /></div>
           <header className="b-main-head">
             <span className="b-main-icon">{step.icon}</span>
@@ -357,9 +416,9 @@ export default function Builder() {
           {error && <p className="b-error">⚠️ {error}</p>}
 
           <footer className="b-nav">
-            <button className="b-back" disabled={isFirst} onClick={() => setStepIndex((i) => Math.max(0, i - 1))}>← Back</button>
-            <button className="b-mobile-preview" onClick={() => setMobilePreview(true)}>👁 Live preview</button>
-            {!isShare && <button className="b-next" onClick={() => setStepIndex((i) => Math.min(steps.length - 1, i + 1))}>Next →</button>}
+            <button className="b-back" disabled={isFirst} onClick={goPrev}>← Back</button>
+            <button className="b-mobile-preview" onClick={() => setMobilePreview(true)}>👁 Preview</button>
+            {!isShare && <button className="b-next" onClick={goNext}>Next →</button>}
           </footer>
         </section>
 

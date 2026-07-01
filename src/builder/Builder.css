@@ -58,6 +58,36 @@
   font-size: 26px;
   filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.55));
 }
+.b-quick {
+  width: 100%;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.16), rgba(245, 158, 11, 0.05));
+  color: #fbbf24;
+  font-weight: 800;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.b-quick:hover {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.26), rgba(245, 158, 11, 0.12));
+}
+.b-quick:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.b-quick-sub {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
 .b-steps {
   list-style: none;
   margin: 0;
@@ -183,6 +213,41 @@
   margin: 0 0 14px;
   font-size: 0.88rem;
   color: var(--ink-dim);
+}
+
+/* ── "More options" accordion ──────────────────────────── */
+.b-more {
+  margin-top: 8px;
+}
+.b-more > summary {
+  cursor: pointer;
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--accent-2);
+  padding: 8px 14px;
+  border: 1px solid var(--field-border);
+  border-radius: 999px;
+  background: #10203a;
+  user-select: none;
+}
+.b-more > summary::-webkit-details-marker {
+  display: none;
+}
+.b-more > summary::after {
+  content: '⌄';
+  font-size: 1rem;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+.b-more[open] > summary::after {
+  transform: rotate(180deg);
+}
+.b-more-body {
+  margin-top: 14px;
 }
 
 /* ── Skip toggle ───────────────────────────────────────── */
@@ -634,8 +699,14 @@
     overflow: visible;
   }
   .b-shell {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     height: auto;
+  }
+  /* Let the single column shrink to the viewport so nowrap strips scroll
+     internally instead of stretching the page wider than the screen. */
+  .b-rail,
+  .b-main {
+    min-width: 0;
   }
   .b-rail {
     border-right: none;
@@ -656,6 +727,7 @@
   }
   .b-step.active .b-step-label {
     display: inline;
+    white-space: nowrap;
   }
   .b-main {
     height: auto;
@@ -668,10 +740,26 @@
   .b-mobile-preview {
     display: inline-block;
   }
-  .b-next {
-    margin-left: 0;
-  }
+  /* Sticky bottom action bar in the thumb zone */
   .b-nav {
-    flex-wrap: wrap;
+    position: sticky;
+    bottom: 0;
+    flex-wrap: nowrap;
+    gap: 8px;
+    margin: 20px -16px 0;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    background: rgba(11, 17, 32, 0.92);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid var(--panel-border);
+    z-index: 5;
+  }
+  .b-back,
+  .b-next,
+  .b-mobile-preview {
+    padding: 12px 16px;
+    font-size: 0.9rem;
+  }
+  .b-next {
+    margin-left: auto;
   }
 }
