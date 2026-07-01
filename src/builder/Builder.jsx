@@ -87,7 +87,7 @@ export default function Builder() {
     setResult(null)
     setCopied(false)
     if (!EMAIL_RE.test(email.trim())) {
-      setError('Add a valid email in “The finish” step so answers can reach you.')
+      setError('Add a valid email above so her answers can reach you.')
       return
     }
     if (!enabledPages.length) {
@@ -164,14 +164,13 @@ export default function Builder() {
     else goPrev()
   }
 
-  // One-tap create using all defaults — jump to Share and generate (needs an email).
+  // One-tap create using all defaults — jump to Share (email + Generate live there).
   function quickCreate() {
+    setStepIndex(steps.length - 1)
     if (!EMAIL_RE.test(email.trim())) {
-      setStepIndex(steps.findIndex((s) => s.id === 'done'))
-      setError('Add your email here, then tap Quick create 💘')
+      setError('Add your email below, then generate 💘')
       return
     }
-    setStepIndex(steps.length - 1)
     generate()
   }
 
@@ -315,7 +314,6 @@ export default function Builder() {
           <>
             <Field label="Title" value={C.done.title} onChange={setC('done', 'title')} />
             <Field label="Subtitle" value={C.done.subtitle} onChange={setC('done', 'subtitle')} />
-            <Field label="Your email (answers are sent here)" value={email} onChange={setEmail} placeholder="you@example.com" />
             <More>
               <Field label="Closing line" value={C.done.closing} onChange={setC('done', 'closing')} />
               <Field label="Confetti emojis" value={C.done.confetti} onChange={setC('done', 'confetti')} />
@@ -328,9 +326,25 @@ export default function Builder() {
           <div className="share-step">
             {!result ? (
               <>
-                <p className="hint">That’s everything. Generate your link and send it to your person 💕</p>
+                <p className="hint">Last step — pop in your email and generate the link 💕</p>
+                <label className="fld share-email">
+                  <span className="fld-label">📧 Your email — where her answers get sent</span>
+                  <input
+                    type="email"
+                    inputMode="email"
+                    name="email"
+                    autoComplete="email"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    enterKeyHint="done"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                  <span className="fld-hint">🔒 Private — your date never sees this.</span>
+                </label>
                 <ul className="share-summary">
-                  <li><span>📧</span> {email || <em>no email yet</em>}</li>
                   <li><span>🧩</span> {enabledPages.length} question{enabledPages.length === 1 ? '' : 's'}</li>
                   <li><span>💌</span> {stickerFile ? 'custom sticker' : stickerUrl ? 'sticker from URL' : 'default sticker'}</li>
                 </ul>
