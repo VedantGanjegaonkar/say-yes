@@ -25,6 +25,16 @@ export const MONTHS = [
 ]
 export const WEEKDAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
 
+// The ask / invitation. Left blank by default so the builder shows a
+// customised-feeling placeholder and the creator writes their own line.
+export const INVITATION_PLACEHOLDER = 'hey Priya… will you go on a date with me? 🌸'
+export const INVITATION_QUICK_PICKS = [
+  '🌸 Will you go on a date with me? 🌸',
+  '💌 Dinner, me & you — this Friday?',
+]
+// Shown to the recipient when the creator leaves the invitation blank.
+export const DEFAULT_INVITATION = INVITATION_QUICK_PICKS[0]
+
 export const DEFAULT_CONFIG = {
   version: 1,
   theme: null, // { primary, accent } — optional; falls back to existing CSS
@@ -34,13 +44,13 @@ export const DEFAULT_CONFIG = {
     { id: 'datepick', enabled: true },
     { id: 'wheel', enabled: true },
     { id: 'budget', enabled: true },
-    { id: 'drinks', enabled: true },
+    { id: 'drinks', enabled: false }, // skipped by default — creator opts in via "Include it"
     { id: 'playlist', enabled: true },
   ],
 
   content: {
     landing: {
-      invitation: '🌸 Will you go on a date with me? 🌸',
+      invitation: '',
       yesLabel: 'Yes 💕',
       noLabel: 'No',
       teases: [
@@ -102,20 +112,20 @@ export const DEFAULT_CONFIG = {
     },
 
     drinks: {
-      title: 'Pick your poison 😏',
+      title: 'Pick our poison 😏',
       subtitle: 'What are we drinking on our date?',
       teaseLines: ['🍸 Vodka', 'Not vodka 😜', 'Nope!', 'Try another 🙈', 'Anything but this!'],
       options: [
         { id: 'vodka', label: '🍸 Vodka', tease: true },
         { id: 'whisky', label: '🥃 Whisky' },
-        { id: 'skosh', label: '🍹 Skosh' },
-        { id: 'ram', label: '🍶 Ram' },
+        { id: 'skosh', label: '🍹 Skotch' },
+        { id: 'ram', label: '🍶 Rum' },
       ],
       loaderMessages: ['Stocking the bar 🍾', 'Hiding the vodka 🙈', 'Done ✅'],
     },
 
     playlist: {
-      title: 'Build our drunk playlist 🍻',
+      title: 'Build our playlist 🍻',
       subtitle: 'Pick all the bangers (multiple allowed)',
       allowCustom: true,
       customLabel: '➕ Any other',

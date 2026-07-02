@@ -2,7 +2,12 @@ import { useState, useRef } from 'react'
 import { nanoid } from 'nanoid'
 import { supabase } from '../lib/supabase.js'
 import { loadRazorpay } from '../lib/razorpay.js'
-import { cloneDefaultConfig, PAGE_TITLES } from '../lib/defaults.js'
+import {
+  cloneDefaultConfig,
+  PAGE_TITLES,
+  INVITATION_PLACEHOLDER,
+  INVITATION_QUICK_PICKS,
+} from '../lib/defaults.js'
 import { Field, StringList, ObjectList } from './fields.jsx'
 import PreviewPane from './PreviewPane.jsx'
 import defaultSticker from '../assets/default-sticker.webp'
@@ -31,6 +36,9 @@ export default function Builder() {
   const [stickerUrl, setStickerUrl] = useState('')
   const [stepIndex, setStepIndex] = useState(0)
   const [mobilePreview, setMobilePreview] = useState(false)
+  // Which page the modal preview opens on: null → the current step's page;
+  // a page id (e.g. 'landing') → walk the flow from that point.
+  const [previewStart, setPreviewStart] = useState(null)
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState('')
   const [result, setResult] = useState(null)
@@ -264,8 +272,28 @@ export default function Builder() {
       case 'landing':
         return (
           <>
-            <Field label="Invitation" value={C.landing.invitation} onChange={setC('landing', 'invitation')} textarea />
-            <Field label="“Yes” button" value={C.landing.yesLabel} onChange={setC('landing', 'yesLabel')} />
+            <Field
+              label="Invitation"
+              value={C.landing.invitation}
+              onChange={setC('landing', 'invitation')}
+              placeholder={INVITATION_PLACEHOLDER}
+              className="fld-invite"
+              textarea
+              autoFocus
+            />
+            <div className="quick-picks">
+              <span className="quick-picks-label">Quick picks</span>
+              {INVITATION_QUICK_PICKS.map((q) => (
+                <button
+                  type="button"
+                  key={q}
+                  className="quick-pick"
+                  onClick={() => setC('landing', 'invitation')(q)}
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
             <div className="sticker-box">
               <span className="fld-label">Sticker</span>
               <div className="sticker-row">
@@ -411,9 +439,9 @@ export default function Builder() {
           <div className="share-step">
             {!result ? (
               <>
-                <p className="hint">Last step — pop in your email and generate the link 💕</p>
+                {/* <p className="hint">Last step — pop in your email and generate the link 💕</p> */}
                 <label className="fld share-email">
-                  <span className="fld-label">📧 Your email — where her answers get sent</span>
+                  <span className="fld-label">📧 Your email — where their answers get sent</span>
                   <input
                     type="email"
                     inputMode="email"
@@ -435,6 +463,9 @@ export default function Builder() {
                 </ul>
                 <button className="b-go" onClick={payAndGenerate} disabled={generating}>
                   {generating ? 'Working…' : 'Pay ₹9 & generate 💘'}
+                </button>
+                <button className="b-preview-start" type="button" onClick={() => openPreview('landing')}>
+                  👁 Preview from the start
                 </button>
                 <details className="b-code">
                   <summary>Have a team code?</summary>
@@ -478,6 +509,18 @@ export default function Builder() {
 
   const preview = <PreviewPane config={previewConfig} page={step.preview} />
 
+  // Open the modal preview; `fromPage` null keeps the current step, a page id
+  // (e.g. 'landing') starts the walkthrough there.
+  const openPreview = (fromPage = null) => {
+    setPreviewStart(fromPage)
+    setMobilePreview(true)
+  }
+  const closePreview = () => {
+    setMobilePreview(false)
+    setPreviewStart(null)
+  }
+  const modalPreviewPage = previewStart || step.preview
+
   return (
     <main className="builder">
       <div className="b-shell">
@@ -511,6 +554,7 @@ export default function Builder() {
               <h1>{step.label}</h1>
               <p>Step {idx + 1} of {steps.length}</p>
             </div>
+            <button className="b-mobile-preview" onClick={() => openPreview(null)}>👁 Preview</button>
           </header>
 
           <div className="b-step-card" key={step.id}>
@@ -533,7 +577,6 @@ export default function Builder() {
 
           <footer className="b-nav">
             <button className="b-back" disabled={isFirst} onClick={goPrev}>← Back</button>
-            <button className="b-mobile-preview" onClick={() => setMobilePreview(true)}>👁 Preview</button>
             {!isShare && <button className="b-next" onClick={goNext}>Next →</button>}
           </footer>
         </section>
@@ -550,12 +593,14 @@ export default function Builder() {
 
       {/* Mobile preview modal */}
       {mobilePreview && (
-        <div className="pv-modal" onClick={() => setMobilePreview(false)}>
+        <div className="pv-modal" onClick={closePreview}>
           <div className="pv-modal-inner" onClick={(e) => e.stopPropagation()}>
-            <button className="pv-close" onClick={() => setMobilePreview(false)}>✕ Close preview</button>
+            <button className="pv-close" onClick={closePreview}>✕ Close preview</button>
             <div className="phone">
               <div className="phone-notch" />
-              <div className="phone-screen">{preview}</div>
+              <div className="phone-screen">
+                <PreviewPane config={previewConfig} page={modalPreviewPage} />
+              </div>
             </div>
           </div>
         </div>

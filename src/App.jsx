@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom'
+import Home from './pages/Home.jsx'
 import Builder from './builder/Builder.jsx'
 import RecipientLayout from './recipient/RecipientLayout.jsx'
 import Landing from './pages/Landing.jsx'
@@ -13,8 +14,12 @@ import NotFound from './pages/NotFound.jsx'
 export default function App() {
   return (
     <Routes>
-      {/* view1 — the builder */}
-      <Route path="/" element={<Builder />} />
+      {/* marketing landing page */}
+      <Route path="/" element={<Home />} />
+
+      {/* view1 — the builder (trailing /* so the builder's descendant
+          <Routes> preview pane doesn't trip React Router's warning) */}
+      <Route path="/build/*" element={<Builder />} />
 
       {/* view2 — the recipient flow, driven by the saved config for :slug */}
       <Route path="/f/:slug" element={<RecipientLayout />}>

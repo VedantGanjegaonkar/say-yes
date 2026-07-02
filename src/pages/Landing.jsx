@@ -3,6 +3,7 @@ import defaultSticker from '../assets/default-sticker.webp'
 import FakeLoader from '../components/FakeLoader.jsx'
 import { useConfig } from '../context/ConfigContext.jsx'
 import { useFlowNav } from '../recipient/useFlowNav.js'
+import { DEFAULT_INVITATION } from '../lib/defaults.js'
 import './Landing.css'
 
 export default function Landing() {
@@ -35,7 +36,7 @@ export default function Landing() {
           <img src={stickerUrl} alt="sticker" />
         </div>
 
-        <h1 className="question">{c.invitation}</h1>
+        <h1 className="question">{c.invitation?.trim() || DEFAULT_INVITATION}</h1>
 
         <div className="actions">
           <button

@@ -17,14 +17,25 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 
 // ── Basic labeled input ────────────────────────────────────────────────
-export function Field({ label, value, onChange, placeholder, textarea }) {
+export function Field({ label, value, onChange, placeholder, textarea, autoFocus, className }) {
   return (
-    <label className="fld">
+    <label className={className ? `fld ${className}` : 'fld'}>
       <span className="fld-label">{label}</span>
       {textarea ? (
-        <textarea value={value ?? ''} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} rows={2} />
+        <textarea
+          value={value ?? ''}
+          placeholder={placeholder}
+          onChange={(e) => onChange(e.target.value)}
+          rows={2}
+          autoFocus={autoFocus}
+        />
       ) : (
-        <input value={value ?? ''} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} />
+        <input
+          value={value ?? ''}
+          placeholder={placeholder}
+          onChange={(e) => onChange(e.target.value)}
+          autoFocus={autoFocus}
+        />
       )}
     </label>
   )
