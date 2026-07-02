@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { nanoid } from 'nanoid'
 import { supabase } from '../lib/supabase.js'
+import { loadRazorpay } from '../lib/razorpay.js'
 import { cloneDefaultConfig, PAGE_TITLES } from '../lib/defaults.js'
 import { Field, StringList, ObjectList } from './fields.jsx'
 import PreviewPane from './PreviewPane.jsx'
@@ -34,6 +35,7 @@ export default function Builder() {
   const [error, setError] = useState('')
   const [result, setResult] = useState(null)
   const [copied, setCopied] = useState(false)
+  const [bypassCode, setBypassCode] = useState('')
 
   const patch = (fn) =>
     setConfig((prev) => {
@@ -82,50 +84,133 @@ export default function Builder() {
     setStickerUrl('')
   }
 
-  async function generate() {
-    setError('')
-    setResult(null)
-    setCopied(false)
+  function validate() {
     if (!EMAIL_RE.test(email.trim())) {
       setError('Add a valid email above so her answers can reach you.')
-      return
+      return false
     }
     if (!enabledPages.length) {
       setError('Enable at least one question page.')
+      return false
+    }
+    return true
+  }
+
+  // Validate + upload the sticker + build the config. Returns { slug, cfg, stickerPath }.
+  // The actual `forms` row is created server-side (after payment / code) — anon
+  // inserts are locked by RLS, so this can't create the link on its own.
+  async function prepareForm() {
+    const slug = nanoid(12)
+    const cfg = structuredClone(config)
+    let stickerPath = null
+
+    if (stickerFile) {
+      const ext = (stickerFile.name.split('.').pop() || 'png').toLowerCase()
+      const path = `${slug}.${ext}`
+      const { error: upErr } = await supabase.storage
+        .from('stickers')
+        .upload(path, stickerFile, { upsert: false, contentType: stickerFile.type })
+      if (upErr) {
+        throw new Error(`Sticker upload failed (${upErr.message}). You can paste an image URL instead.`)
+      }
+      const { data } = supabase.storage.from('stickers').getPublicUrl(path)
+      cfg.sticker = { url: data.publicUrl }
+      stickerPath = path
+    } else if (stickerUrl.trim()) {
+      cfg.sticker = { url: stickerUrl.trim() }
+    }
+    return { slug, cfg, stickerPath }
+  }
+
+  // Server creates the form (verifying payment or the bypass code) and returns the slug.
+  async function createForm({ slug, cfg, stickerPath }, gate) {
+    const res = await fetch('/api/verify-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        slug,
+        config: cfg,
+        creator_email: email.trim(),
+        sticker_path: stickerPath,
+        ...gate,
+      }),
+    })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) throw new Error(data.error || `Server error ${res.status}`)
+    return data.slug || slug
+  }
+
+  // Paid path: create a Razorpay order → open checkout → verify server-side → link.
+  async function payAndGenerate() {
+    setError('')
+    setResult(null)
+    setCopied(false)
+    if (!validate()) return
+
+    setGenerating(true)
+    try {
+      const prepared = await prepareForm()
+
+      const orderRes = await fetch('/api/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug: prepared.slug, email: email.trim() }),
+      })
+      const order = await orderRes.json().catch(() => ({}))
+      if (!orderRes.ok) throw new Error(order.error || 'Could not start payment')
+
+      const Razorpay = await loadRazorpay()
+      await new Promise((resolve, reject) => {
+        const rzp = new Razorpay({
+          key: order.keyId,
+          order_id: order.orderId,
+          amount: order.amount,
+          currency: order.currency,
+          name: 'DateForm',
+          description: 'Your date link',
+          prefill: { email: email.trim() },
+          theme: { color: '#22d3ee' },
+          handler: async (resp) => {
+            try {
+              const slug = await createForm(prepared, {
+                razorpay_order_id: resp.razorpay_order_id,
+                razorpay_payment_id: resp.razorpay_payment_id,
+                razorpay_signature: resp.razorpay_signature,
+              })
+              setResult({ slug, link: `${window.location.origin}/f/${slug}` })
+              resolve()
+            } catch (e) {
+              reject(e)
+            }
+          },
+          modal: { ondismiss: () => reject(new Error('Payment cancelled — you weren’t charged.')) },
+        })
+        rzp.on('payment.failed', (r) => reject(new Error(r?.error?.description || 'Payment failed.')))
+        rzp.open()
+      })
+    } catch (e) {
+      setError(String(e.message || e))
+    } finally {
+      setGenerating(false)
+    }
+  }
+
+  // Bypass path: an internal code generates the link for free (verified server-side).
+  async function redeemCode() {
+    setError('')
+    setResult(null)
+    setCopied(false)
+    if (!validate()) return
+    const code = bypassCode.trim()
+    if (!code) {
+      setError('Enter your team code.')
       return
     }
 
     setGenerating(true)
     try {
-      const slug = nanoid(12)
-      const cfg = structuredClone(config)
-      let stickerPath = null
-
-      if (stickerFile) {
-        const ext = (stickerFile.name.split('.').pop() || 'png').toLowerCase()
-        const path = `${slug}.${ext}`
-        // upsert:false — unique slug means no conflict, and an upsert would need an UPDATE policy.
-        const { error: upErr } = await supabase.storage
-          .from('stickers')
-          .upload(path, stickerFile, { upsert: false, contentType: stickerFile.type })
-        if (upErr) {
-          throw new Error(`Sticker upload failed (${upErr.message}). You can paste an image URL instead.`)
-        }
-        const { data } = supabase.storage.from('stickers').getPublicUrl(path)
-        cfg.sticker = { url: data.publicUrl }
-        stickerPath = path
-      } else if (stickerUrl.trim()) {
-        cfg.sticker = { url: stickerUrl.trim() }
-      }
-
-      const { error: insErr } = await supabase.from('forms').insert({
-        slug,
-        config: cfg,
-        creator_email: email.trim(),
-        sticker_path: stickerPath,
-      })
-      if (insErr) throw new Error(insErr.message)
-
+      const prepared = await prepareForm()
+      const slug = await createForm(prepared, { bypassCode: code })
       setResult({ slug, link: `${window.location.origin}/f/${slug}` })
     } catch (e) {
       setError(String(e.message || e))
@@ -164,14 +249,14 @@ export default function Builder() {
     else goPrev()
   }
 
-  // One-tap create using all defaults — jump to Share (email + Generate live there).
+  // One-tap create using all defaults — jump to Share (email + pay live there).
   function quickCreate() {
     setStepIndex(steps.length - 1)
     if (!EMAIL_RE.test(email.trim())) {
-      setError('Add your email below, then generate 💘')
+      setError('Add your email below, then pay & generate 💘')
       return
     }
-    generate()
+    payAndGenerate()
   }
 
   function renderStep() {
@@ -348,9 +433,26 @@ export default function Builder() {
                   <li><span>🧩</span> {enabledPages.length} question{enabledPages.length === 1 ? '' : 's'}</li>
                   <li><span>💌</span> {stickerFile ? 'custom sticker' : stickerUrl ? 'sticker from URL' : 'default sticker'}</li>
                 </ul>
-                <button className="b-go" onClick={generate} disabled={generating}>
-                  {generating ? 'Generating…' : 'Generate link 💘'}
+                <button className="b-go" onClick={payAndGenerate} disabled={generating}>
+                  {generating ? 'Working…' : 'Pay ₹9 & generate 💘'}
                 </button>
+                <details className="b-code">
+                  <summary>Have a team code?</summary>
+                  <div className="b-code-row">
+                    <input
+                      type="text"
+                      placeholder="Enter code"
+                      autoCapitalize="characters"
+                      autoCorrect="off"
+                      spellCheck={false}
+                      value={bypassCode}
+                      onChange={(e) => setBypassCode(e.target.value)}
+                    />
+                    <button className="mini" onClick={redeemCode} disabled={generating}>
+                      Skip payment
+                    </button>
+                  </div>
+                </details>
               </>
             ) : (
               <div className="b-result">

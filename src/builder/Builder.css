@@ -546,6 +546,52 @@
   font-size: 0.78rem;
   color: var(--ink-dim);
 }
+/* Internal "team code" escape hatch under the pay button */
+.b-code {
+  margin-top: 14px;
+}
+.b-code > summary {
+  cursor: pointer;
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-dim);
+  user-select: none;
+}
+.b-code > summary::-webkit-details-marker {
+  display: none;
+}
+.b-code > summary::after {
+  content: '⌄';
+  transition: transform 0.2s ease;
+}
+.b-code[open] > summary::after {
+  transform: rotate(180deg);
+}
+.b-code-row {
+  display: flex;
+  gap: 8px;
+  max-width: 320px;
+  margin: 10px auto 0;
+}
+.b-code-row input {
+  flex: 1;
+  min-width: 0;
+  border: 1.5px solid var(--field-border);
+  border-radius: 10px;
+  padding: 9px 11px;
+  font-size: 0.92rem;
+  font-family: inherit;
+  background: var(--field);
+  color: var(--ink);
+}
+.b-code-row input:focus {
+  outline: none;
+  border-color: var(--accent-2);
+}
 .share-summary {
   list-style: none;
   margin: 0 0 20px;
