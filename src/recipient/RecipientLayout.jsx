@@ -60,6 +60,12 @@ export default function RecipientLayout() {
     <ConfigProvider value={{ config: state.config, formId: state.formId, slug }}>
       <PlanProvider>
         <Outlet />
+        {/* Subtle brand mark — rides along in any screenshot / screen-record of
+            the flow. Non-interactive so it never steals a tap on the runaway
+            "No" button or the CTAs. */}
+        <div className="sy-watermark" aria-hidden="true">
+          made with <strong>Say Yes No No</strong> 💌
+        </div>
       </PlanProvider>
     </ConfigProvider>
   )

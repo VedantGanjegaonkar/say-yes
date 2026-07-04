@@ -101,6 +101,18 @@ export default function Done() {
 
         {saved && <p className="mail-note">💌 Delivered straight to their heart (and inbox)</p>}
 
+        {/* The viral loop: the person who was just asked out becomes the next
+            person doing the asking. Only in the real flow — never the builder preview. */}
+        {!preview && (
+          <Link className="make-your-own" to="/build">
+            <span className="myo-icon">💌</span>
+            <span className="myo-copy">
+              <strong>Made with Say Yes No No</strong>
+              <span className="myo-sub">Got someone in mind? Make your own →</span>
+            </span>
+          </Link>
+        )}
+
         <Link className="back-link" to={`/f/${slug}`}>
           ← Start over
         </Link>

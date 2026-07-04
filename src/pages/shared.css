@@ -112,3 +112,24 @@
   font-weight: 600;
   font-size: 0.95rem;
 }
+
+/* Brand watermark on the recipient flow — subtle, fixed, and non-interactive
+   (pointer-events: none) so it appears in screenshots without ever blocking a tap. */
+.sy-watermark {
+  position: fixed;
+  left: 50%;
+  bottom: 8px;
+  transform: translateX(-50%);
+  z-index: 40;
+  pointer-events: none;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  color: var(--rose-text);
+  opacity: 0.34;
+}
+
+.sy-watermark strong {
+  font-weight: 800;
+}

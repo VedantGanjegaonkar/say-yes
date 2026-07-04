@@ -242,6 +242,22 @@ export default function Builder() {
     }
   }
 
+  // One tap to send the link where the crush actually is. Native share sheet on
+  // mobile (WhatsApp, Instagram, iMessage…); WhatsApp web as the desktop fallback.
+  async function shareLink() {
+    const text = 'psst… I made you something 💌'
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Say Yes No No', text, url: result.link })
+      } catch {
+        /* share sheet dismissed — do nothing */
+      }
+      return
+    }
+    const msg = encodeURIComponent(`${text}\n${result.link}`)
+    window.open(`https://wa.me/?text=${msg}`, '_blank', 'noopener')
+  }
+
   const goNext = () => setStepIndex((i) => Math.min(steps.length - 1, i + 1))
   const goPrev = () => setStepIndex((i) => Math.max(0, i - 1))
 
@@ -532,6 +548,10 @@ export default function Builder() {
                   <input readOnly value={result.link} onFocus={(e) => e.target.select()} />
                   <button className="mini" onClick={copyLink}>{copied ? 'Copied ✓' : 'Copy'}</button>
                 </div>
+                <button className="b-share" onClick={shareLink}>
+                  <span className="b-share-main">Send it 💌</span>
+                  <span className="b-share-sub">WhatsApp · Instagram · anywhere you chat</span>
+                </button>
                 <div className="b-actions">
                   <a className="b-open" href={result.link} target="_blank" rel="noreferrer">Open it ↗</a>
                   <button className="b-again" onClick={() => { setResult(null); setStepIndex(0) }}>Make another</button>
