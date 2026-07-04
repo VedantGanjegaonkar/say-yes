@@ -2,6 +2,28 @@
   "buildCommand": "vite build",
   "outputDirectory": "dist",
   "rewrites": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(facebookexternalhit|facebot|twitterbot|whatsapp|linkedinbot|slackbot|telegrambot|discordbot|pinterest|redditbot|applebot|googlebot|bingbot|embedly|quora link preview|showyoubot|outbrain|vkshare|skypeuripreview|nuzzel|bitlybot|iframely|bluesky|mastodon|snapchat|google-inspectiontool).*"
+        }
+      ],
+      "destination": "/api/link-preview?type=home"
+    },
+    {
+      "source": "/f/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(facebookexternalhit|facebot|twitterbot|whatsapp|linkedinbot|slackbot|telegrambot|discordbot|pinterest|redditbot|applebot|googlebot|bingbot|embedly|quora link preview|showyoubot|outbrain|vkshare|skypeuripreview|nuzzel|bitlybot|iframely|bluesky|mastodon|snapchat|google-inspectiontool).*"
+        }
+      ],
+      "destination": "/api/link-preview?type=link&slug=:slug"
+    },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
