@@ -264,9 +264,10 @@ export default function Builder() {
   }
 
   // One-tap create using all defaults — jump to Share (email + pay live there).
+  // We deliberately do NOT auto-open payment here: the user should see the Share
+  // screen (₹9 reframe, "what you built", trust cues) and tap Pay themselves.
   function quickCreate() {
     setStepIndex(steps.length - 1)
-    payAndGenerate()
   }
 
   function renderStep() {
