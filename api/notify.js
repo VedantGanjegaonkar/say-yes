@@ -69,6 +69,10 @@ export default async function handler(req, res) {
     const form = forms[0]
     if (!form) return res.status(404).json({ error: 'Form not found' })
 
+    // Email is optional at creation time. With no recipient there's nowhere to
+    // send — the responses are still saved, we just skip the email step.
+    if (!form.creator_email) return res.status(200).json({ status: 'no-recipient', sent: 0 })
+
     // Responses saved but not yet emailed. Usually one; also acts as a sweep.
     const pending = await sbGet(
       `responses?form_id=eq.${form.id}&notified=eq.false&select=id,answers&order=submitted_at.asc`

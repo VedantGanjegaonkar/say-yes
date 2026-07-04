@@ -77,7 +77,8 @@ export default async function handler(req, res) {
 
   if (!slug || !/^[A-Za-z0-9_-]{6,40}$/.test(slug)) return res.status(400).json({ error: 'Bad slug' })
   if (!config || typeof config !== 'object') return res.status(400).json({ error: 'Missing config' })
-  if (!EMAIL_RE.test(creatorEmail)) return res.status(400).json({ error: 'Invalid email' })
+  // Email is optional; only reject a malformed one when the creator did type it.
+  if (creatorEmail && !EMAIL_RE.test(creatorEmail)) return res.status(400).json({ error: 'Invalid email' })
 
   // ── Decide the path: bypass code, or verified Razorpay payment ──
   let extra
@@ -128,7 +129,7 @@ export default async function handler(req, res) {
 
   // ── Create the form (service_role bypasses RLS) ──
   try {
-    const core = { slug, config, creator_email: creatorEmail, sticker_path: stickerPath }
+    const core = { slug, config, creator_email: creatorEmail || null, sticker_path: stickerPath }
     const ins = await insertForm(core, extra)
     if (ins.status === 409) {
       // Same slug already created (a retry) — treat as success, idempotent.

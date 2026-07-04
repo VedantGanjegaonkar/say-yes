@@ -54,7 +54,7 @@ export default function Home() {
   return (
     <div className="home">
       <nav className="home-nav">
-        <span className="home-wordmark">dateForm 💌</span>
+        <span className="home-wordmark">Say Yes No No 💌</span>
         <button className="btn ghost small" onClick={() => navigate('/build')}>
           Start building
         </button>
@@ -69,7 +69,7 @@ export default function Home() {
             <span className="home-grad">actually say yes to</span>
           </h1>
           <p className="home-hero-sub">
-            dateForm turns “wanna hang out?” into a playful little flow you design in
+            Say Yes No No turns “wanna hang out?” into a playful little flow you design in
             minutes and send as a single private link.
           </p>
           <div className="home-cta-row">
@@ -120,7 +120,7 @@ export default function Home() {
         <div className="home-aurora soft" aria-hidden="true" />
         <div className="home-final-inner">
           <h2 className="home-final-title">Ready to ask?</h2>
-          <p className="home-final-sub">Build your first dateForm in a couple of minutes.</p>
+          <p className="home-final-sub">Build your first date form in a couple of minutes.</p>
           <button className="btn primary" onClick={() => navigate('/build')}>
             Start building
           </button>
@@ -128,8 +128,8 @@ export default function Home() {
       </section>
 
       <footer className="home-footer">
-        <span className="home-wordmark">dateForm 💌</span>
-        <span className="home-footer-note">Made for the brave · © dateForm</span>
+        <span className="home-wordmark">Say Yes No No 💌</span>
+        <span className="home-footer-note">Made for the brave · © Say Yes No No</span>
       </footer>
     </div>
   )

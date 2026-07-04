@@ -14,6 +14,11 @@ import defaultSticker from '../assets/default-sticker.webp'
 import './Builder.css'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+// On touch devices, autofocusing the invitation field pops the keyboard and
+// yanks the cursor there the moment the builder loads — skip autofocus there.
+const IS_TOUCH =
+  typeof window !== 'undefined' &&
+  (window.matchMedia?.('(pointer: coarse)').matches || 'ontouchstart' in window)
 const MAX_STICKER_BYTES = 1024 * 1024 // 1 MB
 const OK_TYPES = ['image/webp', 'image/png', 'image/jpeg']
 const PAGE_ICONS = { datepick: '📅', wheel: '🎡', budget: '💅', drinks: '🍹', playlist: '🎧' }
@@ -93,8 +98,9 @@ export default function Builder() {
   }
 
   function validate() {
-    if (!EMAIL_RE.test(email.trim())) {
-      setError('Add a valid email above so her answers can reach you.')
+    // Email is optional — but if one's typed, it has to be well-formed.
+    if (email.trim() && !EMAIL_RE.test(email.trim())) {
+      setError('That email looks off — fix it, or clear it to skip.')
       return false
     }
     if (!enabledPages.length) {
@@ -174,7 +180,7 @@ export default function Builder() {
           order_id: order.orderId,
           amount: order.amount,
           currency: order.currency,
-          name: 'DateForm',
+          name: 'Say Yes No No',
           description: 'Your date link',
           prefill: { email: email.trim() },
           theme: { color: '#22d3ee' },
@@ -260,10 +266,6 @@ export default function Builder() {
   // One-tap create using all defaults — jump to Share (email + pay live there).
   function quickCreate() {
     setStepIndex(steps.length - 1)
-    if (!EMAIL_RE.test(email.trim())) {
-      setError('Add your email below, then pay & generate 💘')
-      return
-    }
     payAndGenerate()
   }
 
@@ -279,7 +281,7 @@ export default function Builder() {
               placeholder={INVITATION_PLACEHOLDER}
               className="fld-invite"
               textarea
-              autoFocus
+              autoFocus={!IS_TOUCH}
             />
             <div className="quick-picks">
               <span className="quick-picks-label">Quick picks</span>
@@ -439,9 +441,53 @@ export default function Builder() {
           <div className="share-step">
             {!result ? (
               <>
-                {/* <p className="hint">Last step — pop in your email and generate the link 💕</p> */}
+                <p className="share-lead">
+                  It’s built — one tap unlocks your link 💌
+                </p>
+
+                {/* Endowment / IKEA effect: let them admire what they made before
+                    they're asked to pay — seeing it builds ownership + loss aversion. */}
+                <button
+                  type="button"
+                  className="share-preview-card"
+                  onClick={() => openPreview('landing')}
+                >
+                  <span className="spc-eye">👁</span>
+                  <span className="spc-body">
+                    <strong>See what you built</strong>
+                    <span className="spc-meta">
+                      {enabledPages.length} question{enabledPages.length === 1 ? '' : 's'}
+                      {' · '}
+                      {stickerFile ? 'custom sticker' : stickerUrl ? 'sticker from URL' : 'default sticker'}
+                    </span>
+                  </span>
+                  <span className="spc-play">Preview ▸</span>
+                </button>
+
+                {/* Price reframe — the CEO's ₹9 nudge, right above the price. */}
+                <img
+                  className="share-ceo"
+                  src="/ceos_message.png"
+                  alt="9₹ can’t buy you a packet of chips but can get u a date"
+                  loading="lazy"
+                />
+
+                {/* The one decision on this screen — big, singular, reassuring. */}
+                <button className="b-go" onClick={payAndGenerate} disabled={generating}>
+                  {generating ? (
+                    'Working…'
+                  ) : (
+                    <>
+                      <span className="b-go-main">Pay ₹9 &amp; get my link 💘</span>
+                      <span className="b-go-sub">Instant link · one-time · secure checkout</span>
+                    </>
+                  )}
+                </button>
+
+                {/* Optional email — quiet, and below the decision so it adds no
+                    friction before they commit. */}
                 <label className="fld share-email">
-                  <span className="fld-label">📧 Your email — where their answers get sent</span>
+                  <span className="fld-label">📧 Email their answers to me <em className="fld-opt">(optional)</em></span>
                   <input
                     type="email"
                     inputMode="email"
@@ -455,18 +501,10 @@ export default function Builder() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
-                  <span className="fld-hint">🔒 Private — your date never sees this.</span>
+                  <span className="fld-hint">🔒 Private — your date never sees it. Skip it if you don’t need their answers by email.</span>
                 </label>
-                <ul className="share-summary">
-                  <li><span>🧩</span> {enabledPages.length} question{enabledPages.length === 1 ? '' : 's'}</li>
-                  <li><span>💌</span> {stickerFile ? 'custom sticker' : stickerUrl ? 'sticker from URL' : 'default sticker'}</li>
-                </ul>
-                <button className="b-go" onClick={payAndGenerate} disabled={generating}>
-                  {generating ? 'Working…' : 'Pay ₹9 & generate 💘'}
-                </button>
-                <button className="b-preview-start" type="button" onClick={() => openPreview('landing')}>
-                  👁 Preview from the start
-                </button>
+
+                {/* Buried escape hatch for internal team use. */}
                 <details className="b-code">
                   <summary>Have a team code?</summary>
                   <div className="b-code-row">
@@ -480,7 +518,7 @@ export default function Builder() {
                       onChange={(e) => setBypassCode(e.target.value)}
                     />
                     <button className="mini" onClick={redeemCode} disabled={generating}>
-                      Skip payment
+                      ENTER
                     </button>
                   </div>
                 </details>
@@ -526,7 +564,7 @@ export default function Builder() {
       <div className="b-shell">
         {/* Step rail */}
         <aside className="b-rail">
-          <div className="b-brand"><span className="b-frog">🛠️</span> DateForm</div>
+          <div className="b-brand"><span className="b-frog">🛠️</span> Say Yes No No</div>
           <button className="b-quick" onClick={quickCreate} disabled={generating}>
             ⚡ Quick create <span className="b-quick-sub">use defaults</span>
           </button>
